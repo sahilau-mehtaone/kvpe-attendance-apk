@@ -10,65 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ── 1. Checkout ───────────────────────────────────────────────
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      # ── 2. Java 17 ────────────────────────────────────────────────
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # ── 3. Install Gradle 8.6 directly (no cache service needed) ──
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install Gradle 8.6
         run: |
           curl -sL https://services.gradle.org/distributions/gradle-8.6-bin.zip -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /opt/gradle
           echo "/opt/gradle/gradle-8.6/bin" >> $GITHUB_PATH
 
-      # ── 4. Android SDK — accept licenses ─────────────────────────
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      # ── 5. Build DEBUG APK ────────────────────────────────────────
       - name: Build Debug APK
         run: gradle assembleDebug --stacktrace
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
 
-      # ── 6. Rename APK ─────────────────────────────────────────────
-      - name: Rename APK
-        run: |
-          mv app/build/outputs/apk/debug/app-debug.apk \
-             app/build/outputs/apk/debug/kvpe-attendance-v1.0-build${{ github.run_number }}-debug.apk
-
-      # ── 7. Upload artifact ────────────────────────────────────────
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
-          name: kvpe-attendance-debug-build${{ github.run_number }}
-          path: app/build/outputs/apk/debug/kvpe-attendance-v1.0-build${{ github.run_number }}-debug.apk
-          retention-days: 30
-
-      # ── 8. Build RELEASE APK (only if KEYSTORE_BASE64 secret is set) ──
-      - name: Build Release APK
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        env:
-          KEYSTORE_BASE64:  ${{ secrets.KEYSTORE_BASE64 }}
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS:        ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD:     ${{ secrets.KEY_PASSWORD }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
-          export KEYSTORE_PATH=keystore.jks
-          gradle assembleRelease --stacktrace
-
-      - name: Upload Release APK
-        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: kvpe-attendance-release-build${{ github.run_number }}
-          path: app/build/outputs/apk/release/app-release.apk
+          name: kvpe-attendance-debug-${{ github.run_number }}
+          path: app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
