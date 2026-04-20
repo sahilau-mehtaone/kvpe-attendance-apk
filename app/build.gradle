@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'in.co.kvpe.attendance'
+    namespace 'com.kvpe.attendance'
     compileSdk 34
 
     defaultConfig {
-        applicationId "in.co.kvpe.attendance"
+        applicationId "com.kvpe.attendance"
         minSdk 24
         targetSdk 34
         versionCode 1

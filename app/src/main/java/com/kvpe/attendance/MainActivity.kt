@@ -1,4 +1,4 @@
-package `in`.co.kvpe.attendance
+package com.kvpe.attendance
 
 import android.Manifest
 import android.annotation.SuppressLint
