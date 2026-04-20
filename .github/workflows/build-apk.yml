@@ -1,0 +1,83 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:   # allow manual trigger from GitHub UI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ───────────────────────────────────────────────
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ── 2. Java 17 ────────────────────────────────────────────────
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      # ── 3. Android SDK ────────────────────────────────────────────
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      # ── 4. Gradle setup (downloads Gradle 8.6 — no wrapper jar needed) ──
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.6'
+
+      # ── 5. Cache ──────────────────────────────────────────────────
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: gradle-
+
+      # ── 6. Build DEBUG APK ────────────────────────────────────────
+      - name: Build Debug APK
+        run: gradle assembleDebug --stacktrace
+
+      # ── 7. Rename APK with build number ──────────────────────────
+      - name: Rename APK
+        run: |
+          mv app/build/outputs/apk/debug/app-debug.apk \
+             app/build/outputs/apk/debug/kvpe-attendance-v1.0-build${{ github.run_number }}-debug.apk
+
+      # ── 8. Upload Debug APK artifact ──────────────────────────────
+      - name: Upload Debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: kvpe-attendance-debug-build${{ github.run_number }}
+          path: app/build/outputs/apk/debug/kvpe-attendance-v1.0-build${{ github.run_number }}-debug.apk
+          retention-days: 30
+
+      # ── 9. Build RELEASE APK (only if keystore secrets are set) ───
+      - name: Build Release APK
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > app/keystore.jks
+          export KEYSTORE_PATH=keystore.jks
+          gradle assembleRelease --stacktrace
+
+      - name: Upload Release APK
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: kvpe-attendance-release-build${{ github.run_number }}
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
