@@ -18,39 +18,32 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: gradle
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install SDK components
+      - name: Install SDK platform-34
         run: |
-          yes | sdkmanager --licenses || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+          yes | sdkmanager --licenses 2>/dev/null || true
+          sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      - name: Install Gradle 8.6
-        run: |
-          curl -sL https://services.gradle.org/distributions/gradle-8.6-bin.zip -o /tmp/gradle.zip
-          unzip -q /tmp/gradle.zip -d /opt/gradle
-
-      - name: Generate Gradle Wrapper
-        run: /opt/gradle/gradle-8.6/bin/gradle wrapper --gradle-version=8.6 --distribution-type=bin
 
       - name: Build Debug APK
         shell: bash
         run: |
           set -o pipefail
           chmod +x gradlew
-          ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
+          ./gradlew assembleDebug --stacktrace 2>&1 | tee build.log
 
-      - name: Post errors to Step Summary
+      - name: Show build log tail on failure
         if: failure()
         run: |
-          echo "## Build Errors" >> $GITHUB_STEP_SUMMARY
+          echo "## Build Log (last 150 lines)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          grep -E "error:|FAILED|Exception|BUILD FAILED|> Task|Caused by:" build.log | tail -80 >> $GITHUB_STEP_SUMMARY || true
+          tail -150 build.log >> $GITHUB_STEP_SUMMARY 2>/dev/null || echo "(no build.log)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Upload build log (always)
