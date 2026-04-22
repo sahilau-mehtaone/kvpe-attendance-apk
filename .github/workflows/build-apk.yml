@@ -31,6 +31,12 @@ jobs:
       - name: Write local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
 
+      - name: Install Gradle 8.6 and regenerate wrapper
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.6-bin.zip -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp/gradle
+          /tmp/gradle/gradle-8.6/bin/gradle wrapper --gradle-version=8.6 --distribution-type=bin
+
       - name: Build Debug APK
         shell: bash
         run: |

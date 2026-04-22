@@ -15,20 +15,6 @@ android {
         versionName "1.0"
     }
 
-    signingConfigs {
-        release {
-            // Only set storeFile if KEYSTORE_PATH env var is present — avoids
-            // AGP 8.x validation error when building debug without a keystore
-            def ksPath = System.getenv("KEYSTORE_PATH")
-            if (ksPath) {
-                storeFile     file(ksPath)
-                storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
-                keyAlias      System.getenv("KEY_ALIAS") ?: ""
-                keyPassword   System.getenv("KEY_PASSWORD") ?: ""
-            }
-        }
-    }
-
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
@@ -36,14 +22,8 @@ android {
             debuggable true
         }
         release {
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Use release signing only if keystore env vars are provided
-            def ksPath = System.getenv("KEYSTORE_PATH")
-            if (ksPath) {
-                signingConfig signingConfigs.release
-            }
         }
     }
 
