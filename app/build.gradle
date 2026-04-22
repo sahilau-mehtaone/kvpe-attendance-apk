@@ -17,10 +17,15 @@ android {
 
     signingConfigs {
         release {
-            storeFile     file(System.getenv("KEYSTORE_PATH") ?: "keystore.jks")
-            storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
-            keyAlias      System.getenv("KEY_ALIAS") ?: ""
-            keyPassword   System.getenv("KEY_PASSWORD") ?: ""
+            // Only set storeFile if KEYSTORE_PATH env var is present — avoids
+            // AGP 8.x validation error when building debug without a keystore
+            def ksPath = System.getenv("KEYSTORE_PATH")
+            if (ksPath) {
+                storeFile     file(ksPath)
+                storePassword System.getenv("KEYSTORE_PASSWORD") ?: ""
+                keyAlias      System.getenv("KEY_ALIAS") ?: ""
+                keyPassword   System.getenv("KEY_PASSWORD") ?: ""
+            }
         }
     }
 
@@ -34,7 +39,7 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            // Use release signing if env vars are set, otherwise fall back to debug
+            // Use release signing only if keystore env vars are provided
             def ksPath = System.getenv("KEYSTORE_PATH")
             if (ksPath) {
                 signingConfig signingConfigs.release
