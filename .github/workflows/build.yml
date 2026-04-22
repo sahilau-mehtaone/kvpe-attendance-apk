@@ -32,15 +32,16 @@ jobs:
       - name: Build Debug APK
         run: |
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1
+          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          exit ${PIPESTATUS[0]}
 
-      - name: Print Gradle error on failure
-        if: failure()
-        run: |
-          echo "=== GRADLE ERROR SUMMARY ==="
-          find . -path "*/build/reports" -prune -o -name "*.log" -print 2>/dev/null | xargs grep -l "error\|FAILED\|Exception" 2>/dev/null | head -5 | xargs cat 2>/dev/null | tail -80 || echo "No log files found"
-          echo "=== DAEMON LOG ==="
-          find $HOME/.gradle/daemon -name "*.log" 2>/dev/null | sort -r | head -1 | xargs tail -60 2>/dev/null || echo "No daemon log"
+      - name: Upload build log (always)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ github.run_number }}
+          path: build.log
+          retention-days: 7
 
       - name: Upload Debug APK
         if: success()
