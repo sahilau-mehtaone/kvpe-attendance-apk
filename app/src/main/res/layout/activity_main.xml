@@ -1,60 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
-    <!-- Swipe-to-refresh wraps the WebView -->
-    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefresh"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <WebView
-            android:id="@+id/webview"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <!-- Offline / error screen (shown when no network) -->
+    <!-- Update banner — hidden until server reports a newer version -->
     <LinearLayout
-        android:id="@+id/offlineView"
+        android:id="@+id/updateBanner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:padding="32dp"
-        android:visibility="gone"
-        android:background="@color/bg_white">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#1C2B4B"
+        android:paddingStart="16dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:gravity="center_vertical"
+        android:visibility="gone">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="📡"
-            android:textSize="64sp"
-            android:layout_marginBottom="16dp" />
-
-        <TextView
-            android:id="@+id/offlineMsg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:textColor="@color/text_secondary"
-            android:textAlignment="center"
-            android:layout_marginBottom="28dp"
-            android:lineSpacingExtra="4dp"
-            android:text="No internet connection.\nPlease check your Wi-Fi or mobile data." />
+            android:layout_weight="1"
+            android:text="🔔 New update available"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
 
         <Button
-            android:id="@+id/retryButton"
+            android:id="@+id/updateBtn"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Try Again"
-            android:backgroundTint="@color/brand_blue"
-            android:textColor="@android:color/white"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp" />
+            android:layout_height="32dp"
+            android:text="Update"
+            android:textSize="12sp"
+            android:textColor="#1C2B4B"
+            android:backgroundTint="#FFFFFF"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginEnd="4dp" />
+
+        <Button
+            android:id="@+id/dismissBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:text="Later"
+            android:textSize="12sp"
+            android:textColor="#AAAAAA"
+            android:backgroundTint="@android:color/transparent"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
 
     </LinearLayout>
 
-</FrameLayout>
+    <!-- Main content: WebView + offline screen -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <!-- Swipe-to-refresh wraps the WebView -->
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <WebView
+                android:id="@+id/webview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <!-- Offline / error screen (shown when no network) -->
+        <LinearLayout
+            android:id="@+id/offlineView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone"
+            android:background="@color/bg_white">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📡"
+                android:textSize="64sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/offlineMsg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:textColor="@color/text_secondary"
+                android:textAlignment="center"
+                android:layout_marginBottom="28dp"
+                android:lineSpacingExtra="4dp"
+                android:text="No internet connection.\nPlease check your Wi-Fi or mobile data." />
+
+            <Button
+                android:id="@+id/retryButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Try Again"
+                android:backgroundTint="@color/brand_blue"
+                android:textColor="@android:color/white"
+                android:paddingStart="32dp"
+                android:paddingEnd="32dp" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+</LinearLayout>
