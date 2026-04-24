@@ -217,7 +217,11 @@ class MainActivity : AppCompatActivity() {
             javaScriptEnabled               = true
             domStorageEnabled               = true
             databaseEnabled                 = true
-            cacheMode                       = WebSettings.LOAD_DEFAULT
+            // LOAD_NO_CACHE — always fetch HTML/JS fresh from the network.
+            // Fixes the "APK stuck on old version" issue where WebView's
+            // HTTP cache served stale /app-login before the service worker
+            // could intercept. SW still handles offline queueing.
+            cacheMode                       = WebSettings.LOAD_NO_CACHE
             mediaPlaybackRequiresUserGesture = false
             useWideViewPort                 = true
             loadWithOverviewMode            = true
